@@ -90,7 +90,7 @@ class PlayGame:
         # setup dialogue box
         self.game_box = Toplevel()
 
-        self.play_frame = Frame(padx=10, pady=10)
+        self.play_frame = Frame(self.game_box, padx=10, pady=10)
         self.play_frame.grid()
 
         self.temp_num_games = num_games
@@ -108,8 +108,6 @@ class PlayGame:
 
             # change games left counter
             self.temp_num_games -= 1
-
-        root.mainloop()
 
 
 # main routine
