@@ -106,6 +106,10 @@ class PlayGame:
         self.hints_stats_frame = Frame(self.play_frame, width=self.button_width)
         self.hints_stats_frame.grid(row=6, column=0)
 
+        # Create frame to hold colour select buttons
+        self.colour_frame = Frame(self.play_frame, width=self.button_width)
+        self.colour_frame.grid(row=2)
+
         # create variable to track how many rounds left to play
         temp_games = num_games
 
@@ -117,7 +121,6 @@ class PlayGame:
 
             # identify what the score to beat is
             self.score_to_beat = "#"
-
 
             # create games played label
             self.games_label = (f"Round {num_games - temp_games} of {num_games}\n"
@@ -132,8 +135,35 @@ class PlayGame:
                                           fg="#000000")
             self.beat_score_label.grid(row=1)
 
+            # Create color select options
+            self.colour_1 = "Colour 1"
+            self.colour_2 = "Colour 2"
+            self.colour_3 = "Colour 3"
+            self.colour_4 = "Colour 4"
+
+            # list to create colour select buttons from
+            # Text | bg Colour | Row | Column | Command
+
+            colour_button_list = [
+                [self.colour_1, "#000000", 0, 0],
+                [self.colour_2, "#000000", 0, 1],
+                [self.colour_3, "#000000", 1, 0],
+                [self.colour_4, "#000000", 1, 1]
+            ]
+
+            for colour_item in colour_button_list:
+                self.colour_buttons = Button(self.colour_frame, text=colour_item[0], fg="#ffffff",
+                                             bg=colour_item[1], width=9, font="Arial 16 bold", # command goes here
+                                             )
+                self.colour_buttons.grid(row=colour_item[2], column=colour_item[3], padx=5, pady=5)
+
+            # create result label
+            self.result_label = Label(self.play_frame, text="You Chose, Result", fg="#000000",
+                                      font="Arial 12")
+            self.result_label.grid(row=3, column=0)
+
             # if they are not on their last round show the next round button
-            if temp_games > 0:
+            if temp_games == 0:
                 self.make_next_button = "No"
 
             else:
@@ -142,7 +172,7 @@ class PlayGame:
             # list to create the buttons from
             # [Make buton yes/no | Frame | Text | Width | Background | Row | Column | Command
             make_buttons_list = [
-                ["Yes", self.play_frame, "Next Round", self.button_width, "#0057d8", 5, 0, self.next_round],
+                [self.make_next_button, self.play_frame, "Next Round", self.button_width, "#0057d8", 5, 0, self.next_round],
                 ["Yes", self.hints_stats_frame, "Hints", 9, "#ff8000", 1, 0, self.to_hints],
                 ["Yes", self.hints_stats_frame, "Stats", 9, "#333333", 1, 1, self.to_stats],
                 ["Yes", self.play_frame, "End Game", self.button_width, "#990000", 7, 0, self.close_play],
@@ -162,28 +192,11 @@ class PlayGame:
                     self.button_ref_list.append(self.make_button)
 
             # Name the buttons
-            self.next_button = self. button_ref_list[0]
-            self.hints_button = self.button_ref_list[1]
-            self.stats_button = self.button_ref_list[2]
-            self.end_game_button = self.button_ref_list[3]
-
-
-            # # if they are not on their last round add a next round button
-            # if temp_games > 0:
-            #     self.next_button = Button(self.play_frame, text="Next", fg="#000000",
-            #                               bg="#0057d8", font="Arial 16 bold", width=self.button_width)
-            #     self.next_button.grid(row=5, column=0, padx=5, pady=5)
-            #
-            # # create button that shows hints windows when pressed
-            # self.hint_button = Button(self.hints_stats_frame, text="Hints", bg="#ff8000", fg="#000000",
-            #                           font="Arial 16 bold")
-            # self.hint_button.grid(row=0, column=0, padx=5, pady=5)
-            #
-            # # create and display the end game button
-            # self.end_game_button = Button(self.play_frame, text="End Game", fg="#000000",
-            #                               bg="#ff0000", font="Arial 16 bold", width=self.button_width,
-            #                               command=self.close_play)
-            # self.end_game_button.grid(row=7, padx=5, pady=5)
+            if self.make_next_button == "Yes":
+                self.next_button = self. button_ref_list[0]
+                self.hints_button = self.button_ref_list[1]
+                self.stats_button = self.button_ref_list[2]
+                self.end_game_button = self.button_ref_list[3]
 
     def close_play(self):
         # open number of games select tab
@@ -195,6 +208,14 @@ class PlayGame:
 
     def next_round(self):
         """" this function takes you to the next round """
+
+
+    def to_hints(self):
+        """ this function sends you to the hint page """
+
+
+    def to_stats(self):
+        """ this function sends you to the stats page """
 
 
 # main routine
