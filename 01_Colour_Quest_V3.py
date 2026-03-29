@@ -129,6 +129,8 @@ class StartGame:
                 self.label_ref_list[2].config(text=self.choose_string,
                                               fg=self.choose_txt_colour, font="Arial 14 bold")
 
+                self.num_rounds.config(bg="#ffffff")
+
                 # send user to PlayGame class to start the game
                 PlayGame(rounds)
 
@@ -140,10 +142,14 @@ class StartGame:
                 self.label_ref_list[2].config(text="Please enter an integer between 1 and 100",
                                               fg="#880808", font="Arial 14 bold")
 
+                self.num_rounds.config(bg="#f4cccc")
+
         except ValueError:
             # change the text and change colour to red for the error message
             self.label_ref_list[2].config(text="Please enter a Valid integer", fg="#880808",
                                           font="Arial 14 bold")
+
+            self.num_rounds.config(bg="#f4cccc")
 
 
 class PlayGame:
@@ -207,6 +213,7 @@ class PlayGame:
             self.rounds_left.set(temp_games)
 
             # identify what the score to beat is
+            self.target_score.set(get_round_colours()[1])
             score_to_beat = self.target_score.get()
 
             # create games played label
@@ -214,12 +221,12 @@ class PlayGame:
                                 f"You Have {temp_games} rounds left")
 
             # Create label show what game number they are on
-            play_label = Label(self.play_frame, text=games_label, fg="#000000", font="Arial 14")
+            play_label = Label(self.play_frame, text=games_label, fg="#000000", font="Arial 18")
             play_label.grid(row=0, column=0)
 
             # create label to show the score to beat
             beat_score_label = Label(self.play_frame, text=f"sore to beat = {score_to_beat}",
-                                          fg="#000000")
+                                          fg="#000000", font="Arial 14 bold")
             beat_score_label.grid(row=1)
 
             round_colours = get_round_colours()[0]
