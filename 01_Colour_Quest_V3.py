@@ -297,13 +297,14 @@ class PlayGame:
                 self.button_ref_list.append(make_button)
 
 
-
-
-    def change_round(self):
+    def round_results(self, user_choice):
         """
-        closes old round box and opens a new one for the next round
+        retrieves which button was pressed (Index 0 - 3), retrieves
+        score and compares it with median, updates results and add results to stats page
         """
-
+        # get user score and colour based on button press...
+        score = int(get_round_colours()[user_choice][1])
+        print(score)
 
 
     def close_play(self):
