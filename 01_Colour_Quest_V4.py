@@ -59,8 +59,9 @@ def get_round_colours():
     # get median score/target score
     midian = (int_scores[1] + int_scores[2]) / 2
     midian = round_ans(midian)
+    highest = int_scores[-1]
 
-    return round_colours, midian
+    return round_colours, midian, highest
 
 
 # Classes start here
@@ -174,6 +175,9 @@ class PlayGame:
         self.rounds_wanted = IntVar()
         self.rounds_wanted.set(num_games)
 
+        # initialise lists needed for colour storage etc
+        self.round_colour_list = []
+
         # setup dialogue box
         self.play_box = Toplevel()
 
@@ -183,23 +187,71 @@ class PlayGame:
         self.play_frame = Frame(self.play_box, padx=10, pady=10)
         self.play_frame.grid()
 
-        # create frame to hold hints and stats buttons
-        self.hints_stats_frame = Frame(self.play_frame, width=self.button_width)
-        self.hints_stats_frame.grid(row=6, column=0)
-
         # Create frame to hold colour select buttons
         self.colour_frame = Frame(self.play_frame, width=self.button_width)
         self.colour_frame.grid(row=2)
 
-        # List to hold buttons after they are created
-        self.button_ref_list = []
+        self.colour_button_ref = []
+        self.button_colours_list = []
 
-        # initialize the variable that sets the button to greyed out and vice versa
-        self.grey_next_button = "Yes"
+        rounds_left = self.rounds_left.get()
+
+        # create games played label
+        games_label = (f"Round {num_games - rounds_left} of {num_games}\n"
+                       f"You Have {rounds_left} rounds left")
+
+        # Create label show what game number they are on
+        play_label = Label(self.play_frame, text=games_label, fg="#000000", font="Arial 18")
+        play_label.grid(row=0, column=0)
+
+        # create label to show the score to beat
+        beat_score_label = Label(self.play_frame, text=f"sore to beat",
+                                 fg="#000000", font="Arial 14 bold")
+        beat_score_label.grid(row=1)
+
+        # create four buttons in a 2 x 2 grid
+        for item in range(0, 4):
+            self.colour_button = Button(self.colour_frame, font="Arial 12",
+                                        text="Colour Name", width=15,
+                                        command=partial(self.round_results, item))
+            self.colour_button.grid(row=item // 2,
+                                    column=item % 2,
+                                    padx=5, pady=5)
+
+            self.colour_button_ref.append(self.colour_button)
+
+            # create result label
+            self.result_label = Label(self.play_frame, text="You Chose, Result", fg="#000000",
+                                 font="Arial 12")
+            self.result_label.grid(row=3, column=0)
+
+            self.hints_stats_frame = Frame(self.play_frame)
+            self.hints_stats_frame.grid(row=6)
+
+            # list to create the buttons from
+            # [Make buton yes/no | Frame | Text | Width | Background | Row | Column | Command
+            make_buttons_list = [
+                ["No", self.play_frame, "Next Round", self.button_width, "#0057d8", 5, 0, self.new_round],
+                ["No", self.hints_stats_frame, "Hints", 18, "#ff8000", 1, 0, self.to_hints],
+                ["No", self.hints_stats_frame, "Stats", 18, "#333333", 1, 1, self.to_stats],
+                ["No", self.play_frame, "End Game", self.button_width, "#990000", 7, 0, self.close_play],
+            ]
+
+            self.button_ref_list = []
+
+            # create the buttons using the values from make_buttons_list
+            for item in make_buttons_list:
+                make_button = Button(item[1], text=item[2], fg="#000000",
+                                          width=item[3], bg=item[4], font="Arial 16 bold",
+                                          command=item[7])
+                make_button.grid(row=item[5], column=item[6], padx=5, pady=5)
+
+                self.button_ref_list.append(make_button)
+
+            self.next_button = self.button_ref_list[0]
 
         self.new_round()
 
-        self.to_hints_button = self.button_ref_list[1]
 
 
     def new_round(self):
@@ -216,94 +268,20 @@ class PlayGame:
             self.rounds_left.set(temp_games)
 
             # identify what the score to beat is
-            self.target_score.set(get_round_colours()[1])
-            score_to_beat = self.target_score.get()
+            self.round_colour_list, median, highest = get_round_colours()
 
-            # create games played label
-            games_label = (f"Round {self.num_games - temp_games} of {self.num_games}\n"
-                                f"You Have {temp_games} rounds left")
+            for count, item in enumerate(self.colour_button_ref):
+                item.config(fg=self.round_colour_list[count][2],
+                            bg=self.round_colour_list[count][0],
+                            text=self.round_colour_list[count][0], state=NORMAL)
 
-            # Create label show what game number they are on
-            play_label = Label(self.play_frame, text=games_label, fg="#000000", font="Arial 18")
-            play_label.grid(row=0, column=0)
+            if self.rounds_left.get() == 0:
+                self.next_button.config(state="disabled", text="(This is your last round!)",
+                                   fg="#990000")
 
-            # create label to show the score to beat
-            beat_score_label = Label(self.play_frame, text=f"sore to beat = {score_to_beat}",
-                                          fg="#000000", font="Arial 14 bold")
-            beat_score_label.grid(row=1)
-
-            round_colours = get_round_colours()[0]
-            round_median = get_round_colours()[1]
-
-            # Create color select options
-            colour_name_1 = round_colours[0][0]
-            colour_name_2 = round_colours[1][0]
-            colour_name_3 = round_colours[2][0]
-            colour_name_4 = round_colours[3][0]
-
-            colour_fg_1 = round_colours[0][2]
-            colour_fg_2 = round_colours[1][2]
-            colour_fg_3 = round_colours[2][2]
-            colour_fg_4 = round_colours[3][2]
-
-            # list to create colour select buttons from
-            # Text | bg Colour | fg colour | Row | Column | Command
-
-            colour_button_list = [
-                [colour_name_1, colour_fg_1, 0, 0],
-                [colour_name_2, colour_fg_2, 0, 1],
-                [colour_name_3, colour_fg_3, 1, 0],
-                [colour_name_4, colour_fg_4, 1, 1]
-            ]
-
-            for colour_item in colour_button_list:
-                colour_buttons = Button(self.colour_frame, text=colour_item[0], bg=colour_item[0], fg=colour_item[1],
-                                        width=18, font="Arial 16 bold", command=self.colour_pick)
-                colour_buttons.grid(row=colour_item[2], column=colour_item[3], padx=5, pady=5)
-
-            # create result label
-            result_label = Label(self.play_frame, text="You Chose, Result", fg="#000000",
-                                      font="Arial 12")
-            result_label.grid(row=3, column=0)
-
-            # if they are not on their last round show the next round button
-            if temp_games == 0:
-                self.grey_next_button = "Yes"
-
-            # list to create the buttons from
-            # [Make buton yes/no | Frame | Text | Width | Background | Row | Column | Command
-            make_buttons_list = [
-                [self.grey_next_button, self.play_frame, "Next Round", self.button_width, "#0057d8", 5, 0, self.new_round],
-                ["No", self.hints_stats_frame, "Hints", 18, "#ff8000", 1, 0, self.to_hints],
-                ["No", self.hints_stats_frame, "Stats", 18, "#333333", 1, 1, self.to_stats],
-                ["No", self.play_frame, "End Game", self.button_width, "#990000", 7, 0, self.close_play],
-            ]
-
-            # create the buttons using the values from make_buttons_list
-            for item in make_buttons_list:
-                make_button = Button(item[1], text=item[2], fg="#000000",
-                                          width=item[3], bg=item[4], font="Arial 16 bold",
-                                          command=item[7])
-                make_button.grid(row=item[5], column=item[6], padx=5, pady=5)
-
-                if item[0] == "Yes":
-                    make_button.config(state="disabled", text=f"{item[2]} (This is your last round!)",
-                                       fg="#990000")
-
-                else:
-                    make_button.config(state="normal")
-
-                self.button_ref_list.append(make_button)
-
-
-    def colour_pick(self):
-        """
-        when the colour buttons are clicked change the next button to be ungreyed if not on the last round
-        and change the result label
-        """
-
-        if self.rounds_left.get() > 0:
-            self.grey_next_button = "No"
+            else:
+                self.next_button.config(state="disabled", text="Next Round",
+                                        fg="#990000")
 
 
     def round_results(self, user_choice):
@@ -312,9 +290,17 @@ class PlayGame:
         score and compares it with median, updates results and add results to stats page
         """
         # get user score and colour based on button press...
-        score = int(get_round_colours()[user_choice][1])
+        score = int(self.round_colour_list[user_choice][1])
         print(score)
 
+        for item in self.colour_button_ref:
+            item.config(state="disabled")
+
+        self.result_label.config(text=f"You Chose, {score}")
+
+        if self.rounds_left.get() > 0:
+            self.next_button.config(state="normal", text="Next Round",
+                                    fg="#000000")
 
     def close_play(self):
         # open number of games select tab
