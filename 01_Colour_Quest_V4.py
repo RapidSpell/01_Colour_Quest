@@ -124,7 +124,7 @@ class StartGame:
         try:
             rounds = int(self.num_rounds.get())
 
-            if 0 < rounds < 100:
+            if 0 < rounds <= 100:
                 # set label back to standard so if they come back to the
                 # round select page it will not still be red
                 self.label_ref_list[2].config(text=self.choose_string,
@@ -177,6 +177,8 @@ class PlayGame:
 
         # initialise lists needed for colour storage etc
         self.round_colour_list = []
+        self.all_scores_list = []
+        self.all_medians_list = []
 
         # setup dialogue box
         self.play_box = Toplevel()
@@ -205,9 +207,9 @@ class PlayGame:
         play_label.grid(row=0, column=0)
 
         # create label to show the score to beat
-        beat_score_label = Label(self.play_frame, text=f"sore to beat",
+        self.beat_score_label = Label(self.play_frame, text=f"sore to beat",
                                  fg="#000000", font="Arial 14 bold")
-        beat_score_label.grid(row=1)
+        self.beat_score_label.grid(row=1)
 
         # create four buttons in a 2 x 2 grid
         for item in range(0, 4):
@@ -220,38 +222,43 @@ class PlayGame:
 
             self.colour_button_ref.append(self.colour_button)
 
-            # create result label
-            self.result_label = Label(self.play_frame, text="You Chose, Result", fg="#000000",
-                                 font="Arial 12")
-            self.result_label.grid(row=3, column=0)
+        # create result label
+        self.result_label = Label(self.play_frame, text="", fg="#000000",
+                             font="Arial 12")
+        self.result_label.grid(row=3, column=0)
 
-            self.hints_stats_frame = Frame(self.play_frame)
-            self.hints_stats_frame.grid(row=6)
+        self.hints_stats_frame = Frame(self.play_frame)
+        self.hints_stats_frame.grid(row=6)
 
-            # list to create the buttons from
-            # [Make buton yes/no | Frame | Text | Width | Background | Row | Column | Command
-            make_buttons_list = [
-                ["No", self.play_frame, "Next Round", self.button_width, "#0057d8", 5, 0, self.new_round],
-                ["No", self.hints_stats_frame, "Hints", 18, "#ff8000", 1, 0, self.to_hints],
-                ["No", self.hints_stats_frame, "Stats", 18, "#333333", 1, 1, self.to_stats],
-                ["No", self.play_frame, "End Game", self.button_width, "#990000", 7, 0, self.close_play],
-            ]
+        # list to create the buttons from
+        # [Make buton yes/no | Frame | Text | Width | Background | Row | Column | Command
+        make_buttons_list = [
+            ["No", self.play_frame, "Next Round", self.button_width, "#0057d8", 5, 0, self.new_round],
+            ["No", self.hints_stats_frame, "Hints", 18, "#ff8000", 1, 0, self.to_hints],
+            ["No", self.hints_stats_frame, "Stats", 18, "#333333", 1, 1, self.to_stats],
+            ["No", self.play_frame, "End Game", self.button_width, "#990000", 7, 0, self.close_play],
+        ]
 
-            self.button_ref_list = []
+        self.button_ref_list = []
 
-            # create the buttons using the values from make_buttons_list
-            for item in make_buttons_list:
-                make_button = Button(item[1], text=item[2], fg="#000000",
-                                          width=item[3], bg=item[4], font="Arial 16 bold",
-                                          command=item[7])
-                make_button.grid(row=item[5], column=item[6], padx=5, pady=5)
+        # create the buttons using the values from make_buttons_list
+        for item in make_buttons_list:
+            make_button = Button(item[1], text=item[2], fg="#000000",
+                                      width=item[3], bg=item[4], font="Arial 16 bold",
+                                      command=item[7])
+            make_button.grid(row=item[5], column=item[6], padx=5, pady=5)
 
-                self.button_ref_list.append(make_button)
+            self.button_ref_list.append(make_button)
 
-            self.next_button = self.button_ref_list[0]
+        self.next_button = self.button_ref_list[0]
+
+        self.to_hints_button = self.button_ref_list[1]
+
+        # disable stats button
+        self.to_stats_button = self.button_ref_list[2]
+        self.to_stats_button.config(state="disabled")
 
         self.new_round()
-
 
 
     def new_round(self):
@@ -269,11 +276,17 @@ class PlayGame:
 
             # identify what the score to beat is
             self.round_colour_list, median, highest = get_round_colours()
+            self.target_score.set(median)
+
+            self.beat_score_label.config(text=f"Target score: {median}")
+
 
             for count, item in enumerate(self.colour_button_ref):
                 item.config(fg=self.round_colour_list[count][2],
                             bg=self.round_colour_list[count][0],
                             text=self.round_colour_list[count][0], state=NORMAL)
+
+            self.result_label.config(text="You Chose, Result")
 
             if self.rounds_left.get() == 0:
                 self.next_button.config(state="disabled", text="(This is your last round!)",
@@ -291,16 +304,33 @@ class PlayGame:
         """
         # get user score and colour based on button press...
         score = int(self.round_colour_list[user_choice][1])
-        print(score)
+
+        colour_name = self.colour_button_ref[user_choice].cget('text')
+
+        target = self.target_score.get()
+
+        print(target)
+
+        # retrieve target score and compare with user score to find round result target = self.target_score.get()
+        if score >= target:
+            result_text = f"Success! {colour_name} earned you {score} points"
+            result_bg = "#82B366"
+
+        else:
+            result_text = f"Oops {colour_name} ({score}) is less than the target."
+            result_bg = "#F8CECC"
+
+        self.result_label.config(text=result_text, bg=result_bg)
 
         for item in self.colour_button_ref:
             item.config(state="disabled")
 
-        self.result_label.config(text=f"You Chose, {score}")
+        self.to_stats_button.config(state="normal")
 
         if self.rounds_left.get() > 0:
             self.next_button.config(state="normal", text="Next Round",
                                     fg="#000000")
+
 
     def close_play(self):
         # open number of games select tab
@@ -314,6 +344,9 @@ class PlayGame:
         """ this function sends you to the hint page """
 
         DisplayHints(self)
+
+        # Disable help button
+        self.to_hints_button.config(state=DISABLED)
 
 
     def to_stats(self):
