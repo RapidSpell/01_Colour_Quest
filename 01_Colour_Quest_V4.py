@@ -175,7 +175,10 @@ class PlayGame:
         self.rounds_wanted = IntVar()
         self.rounds_wanted.set(num_games)
 
-        # initialise lists needed for colour storage etc
+        self.round_score = IntVar()
+        self.round_score.set(0)
+
+        # initialize lists needed for colour storage etc
         self.round_colour_list = []
         self.all_scores_list = []
         self.all_medians_list = []
@@ -309,12 +312,13 @@ class PlayGame:
 
         target = self.target_score.get()
 
-        print(target)
-
         # retrieve target score and compare with user score to find round result target = self.target_score.get()
         if score >= target:
             result_text = f"Success! {colour_name} earned you {score} points"
             result_bg = "#82B366"
+
+            self.round_score.set(self.round_score.get() + score)
+            print("total score:", self.round_score.get())
 
         else:
             result_text = f"Oops {colour_name} ({score}) is less than the target."
