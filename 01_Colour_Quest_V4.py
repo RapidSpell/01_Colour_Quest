@@ -199,15 +199,13 @@ class PlayGame:
         self.colour_button_ref = []
         self.button_colours_list = []
 
-        rounds_left = self.rounds_left.get()
-
         # create games played label
-        games_label = (f"Round {num_games - rounds_left} of {num_games}\n"
-                       f"You Have {rounds_left} rounds left")
+        self.games_label_update = (f"Round {self.num_games - self.rounds_left.get()} of {self.num_games}\n"
+                                   f"You Have {self.rounds_left.get()} rounds left")
 
         # Create label show what game number they are on
-        play_label = Label(self.play_frame, text=games_label, fg="#000000", font="Arial 18")
-        play_label.grid(row=0, column=0)
+        self.play_label = Label(self.play_frame, text=self.games_label_update, fg="#000000", font="Arial 18")
+        self.play_label.grid(row=0, column=0)
 
         # create label to show the score to beat
         self.beat_score_label = Label(self.play_frame, text=f"sore to beat",
@@ -299,6 +297,9 @@ class PlayGame:
                 self.next_button.config(state="disabled", text="Next Round",
                                         fg="#990000")
 
+            self.play_label.config(text=f"Round {self.num_games - self.rounds_left.get()} of {self.num_games}\n"
+                                   f"You Have {self.rounds_left.get()} rounds left")
+
 
     def round_results(self, user_choice):
         """
@@ -318,7 +319,6 @@ class PlayGame:
             result_bg = "#82B366"
 
             self.round_score.set(self.round_score.get() + score)
-            print("total score:", self.round_score.get())
 
         else:
             result_text = f"Oops {colour_name} ({score}) is less than the target."
